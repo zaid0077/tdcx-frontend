@@ -9,11 +9,13 @@ function App() {
     <Router>
       <div className="App">
         <Switch>
-        <Route path='/' exact component={Login}></Route>
-        <Route path='/dashboard' exact component={Dashboard}></Route>
+          <Route path='/' exact component={Login}></Route>
+          <Route path='/login' exact component={Login}></Route>
+          <Route path='/dashboard' exact component={Dashboard}></Route>
         </Switch>
-        </div>
+      </div>
     </Router>
+
   );
 }
 

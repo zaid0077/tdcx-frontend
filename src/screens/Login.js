@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { TextField, Grid, makeStyles, } from '@material-ui/core';
-import Button from '../components/Button'
+import { TextField, Grid, makeStyles, Button } from '@material-ui/core';
+import { useStateValue } from "../StateProvider";
 import RestResource from '../services/AuthService';
 const service = new RestResource();
 
@@ -21,6 +21,8 @@ const useStyle = makeStyles(theme => ({
 }))
 
 export default function Login() {
+    const [{ }, dispatch] = useStateValue();
+
     const history = useHistory();
 
     const [email, setEmail] = useState('')
@@ -28,44 +30,61 @@ export default function Login() {
 
     const classes = useStyle();
 
-    const login = (e) => {
+    useEffect(() => {
+        if (localStorage.getItem("token")) {
+            history.push('/dashboard')
+        }
+    })
+
+    const login = async (e) => {
         e.preventDefault();
         let data = {
             email: email,
             password: password
         }
-
-        service.login(data).then(res => {
-            console.log(res)
-        })
+        try {
+            await service.login(data).then(async res => {
+                dispatch({
+                    type: 'LOGIN',
+                    item: {
+                        token: res.data.token
+                    }
+                })
+                localStorage.setItem('token', res.data.token)
+                history.push('/dashboard')
+            })
+        } catch (error) {
+            alert('Username and Password Incorrect')
+        }
     }
 
     return (
         <div className="main-container">
             <div className="container">
-                <h1 className="header-text">Login</h1>
+                <h2 className="header-text">Login</h2>
                 <form className={classes.root}>
                     <Grid container>
                         <Grid item xs={12}>
+                            <TextField
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                label="Email"
+                                variant="outlined" />
 
-                            <TextField 
-                            onChange={(e) => setEmail(e.target.value)} 
-                            value={email} 
-                            label="Email" 
-                            variant="outlined" />
+                            <TextField
+                                type="password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                label="Password"
+                                variant="outlined" />
 
-                            <TextField 
-                            type="password" 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            value={password} 
-                            label="Password" 
-                            variant="outlined" />
-
-                            <Button 
-                            size="large"
-                            onClick={login}
-                            text="submit"
-                            ></Button>
+                            <Button
+                                onClick={login}
+                                style={{ width: '90%', borderRadius: '10' }}
+                                variant="contained"
+                                color="primary">
+                                Login
+                            </Button>
 
                         </Grid>
                     </Grid>

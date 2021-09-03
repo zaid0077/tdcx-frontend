@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Grid, TextField, List, ListItem, ListItemIcon, Divider, ListItemSecondaryAction, ListItemText, Checkbox, IconButton } from '@material-ui/core';
+import {
+  Button, Grid, TextField, List, ListItem,
+  ListItemIcon, ListItemSecondaryAction,
+  ListItemText, Checkbox, IconButton
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
+import DialogComp from './DialogComp';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import RestResource from '../services/DataService';
-import { red } from '@material-ui/core/colors';
 const service = new RestResource();
-
-
 
 function rand() {
   return Math.round(Math.random() * 20) - 10;
@@ -54,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 const deleteTask = (taskId) => {
   service.deleteTask(taskId).then(res => {
-    console.log(res)
+    alert(res.data.message)
   })
 }
 
@@ -68,6 +70,8 @@ const Lists = (props) => {
   const [open, setOpen] = React.useState(false);
   const [addTask, setAddTask] = useState("")
   const [search, setSearch] = useState("")
+  const [showDialog, setShowDialog] = useState(false)
+  const [toEdit, setToEdit] = useState({})
 
   useEffect(() => {
     getTasks()
@@ -85,7 +89,7 @@ const Lists = (props) => {
       name: addTask
     }
     service.addTask(data).then(res => {
-      console.log(res)
+      alert('Success')
     })
   }
 
@@ -99,7 +103,6 @@ const Lists = (props) => {
 
   const body = (
     <div style={modalStyle} className={classes.paper}>
-
       <h2 id="simple-modal-title">+ New Task</h2>
       <Grid container>
         <Grid item xs={12}>
@@ -112,8 +115,8 @@ const Lists = (props) => {
         </Grid>
         <Grid item xs={12}>
 
-          <Button variant="contained" color="primary">
-            Primary
+          <Button style={{ width: '90%' }} variant="contained" color="primary">
+            Add Task
           </Button>
         </Grid>
       </Grid>
@@ -122,17 +125,21 @@ const Lists = (props) => {
   );
 
 
+  const edit = (value) => {
+    setShowDialog(true)
+    setToEdit(value)
+  }
+
+  const test = () => {
+    alert(1234)
+  }
+
   const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
+    let toUpdate = value.completed == true ? false : true
+    service.changeTaskStatus({ id: value._id, toUpdate }).then(res => {
+      setTasks(res.data.updatedTasks)
+    })
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
   };
 
   return (
@@ -145,8 +152,11 @@ const Lists = (props) => {
           label="Search by Task Name"
           variant="outlined" />
 
-        <Button style={{height: '55px', borderRadius: '10px', marginLeft: '20px'}} variant="contained" color="primary">
-         + New Task
+        <Button onClick={handleOpen}
+          style={{ height: '55px', borderRadius: '10px', marginLeft: '20px' }}
+          variant="contained"
+          color="primary">
+          + New Task
         </Button>
 
       </div>
@@ -164,7 +174,8 @@ const Lists = (props) => {
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  checked={checked.indexOf(value) !== -1}
+                  checked={value.completed}
+                  onChange={handleToggle}
                   tabIndex={-1}
                   disableRipple
                 />
@@ -175,7 +186,7 @@ const Lists = (props) => {
                   <DeleteIcon onClick={() => deleteTask(value._id)} />
                 </IconButton>
                 <IconButton edge="end">
-                  <EditIcon />
+                  <EditIcon onClick={() => edit(value) } />
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
@@ -183,9 +194,6 @@ const Lists = (props) => {
         })}
       </List>
       <div>
-        <button type="button" onClick={handleOpen}>
-          Open Modal
-        </button>
         <Modal
           open={open}
           onClose={handleClose}
@@ -194,6 +202,8 @@ const Lists = (props) => {
         >
           {body}
         </Modal>
+        <DialogComp edit={() => test()} onClose={() => setShowDialog(false)} data={toEdit} show={showDialog}></DialogComp>
+      
       </div>
     </div>
   );
