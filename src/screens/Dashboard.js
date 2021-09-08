@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from '@material-ui/core/styles';
-import {
-    IconButton, Card, CardContent, Typography, Grid, Modal,
-    TextField, Button
-} from '@material-ui/core';
+import { Grid, TextField, Button } from '@material-ui/core';
 import Header from "../components/Header";
-import PieChart from "../components/PieChart";
 import Lists from "../components/Lists";
 import CardList from "../components/CardList";
 import { useHistory } from "react-router-dom";

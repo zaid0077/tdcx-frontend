@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-let BASE_URL = 'http://localhost:9300';
+let BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default class RestResource {
     async login(data) {
